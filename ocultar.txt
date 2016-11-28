@@ -1,0 +1,2 @@
+Hola esto es una prueba del texto que se va a ocultar para probar que funciones de acerdo a lo 
+planeado y que salga de la imagen sin alterarse tanto

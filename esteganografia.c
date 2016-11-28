@@ -72,7 +72,7 @@ void cifrar(int leido, char * bytes, char * texto, char * oculto) {
 
 
 
-int ocultar_datos();
+char extractor();
 
 unsigned char * leer_imagen(char * ruta_imagen, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
 
@@ -138,7 +138,7 @@ int menu() {
     return opcion;
 }
 
-void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera, int cantidad_datos) {
+void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
     FILE * imgSalida;
     imgSalida = fopen("Salida.bmp", "w+");
     printf("\nentro a crear la imagen\n");
@@ -149,9 +149,6 @@ void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, Ca
     fwrite(formato, sizeof (char), 2, imgSalida);
     printf("\nEscribio el tipo de archivo\n");
     //aqui se escriben las cabeceras
-    //    int cantidad_datos=450;
-    cabecera->resv1 = cantidad_datos; //valor para probar guardar datos ocultos
-    //se modifico un valor de la cabecera donde esta reservado 
     fwrite(cabecera, sizeof (CabeceraBMP), 1, imgSalida);
     printf("\nEscribio la cabecera\n");
     fwrite(infoCabeceraBmp, sizeof (InfoCabeceraBMP), 1, imgSalida);
@@ -163,12 +160,9 @@ void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, Ca
     printf("\nAcabo de terminar de escribir la imagen\n");
 }
 
-void leer_datos_img(unsigned char * dataimg) {
+void leer_datos_img(unsigned char * dataimg,InfoCabeceraBMP * info,CabeceraBMP * cabecera) {
     char ruta[30];
     FILE * imagen;
-    InfoCabeceraBMP info;
-    CabeceraBMP cabecera;
-
     //leer los datos
     printf("\ningresa la ruta de la imagen: ");
     scanf("%s", ruta);
@@ -182,7 +176,7 @@ void leer_datos_img(unsigned char * dataimg) {
     fclose(imagen);
 
     //metodo para leer la cabecera
-    dataimg = leer_imagen(ruta, &info, &cabecera);
+    dataimg = leer_imagen(ruta, info, cabecera);
     if (dataimg == NULL) {
         printf("\nERROR EN EL FORMATO DE IMAGEN\n");
     } else {
@@ -203,10 +197,14 @@ void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
     }
     //proceso de obtencion del ultimo bit para construir los datos
     //***********************************************************
-    //***********************************************************
-    //***********************************************************
-    //***********************************************************
+    int index = 0;
+    for (x = 0; x < cantidad_datos; x++) {
+        texto[x] = extractor(imgdata, index);
+        index += 8;
+    }
 
+    //ahora que se leyeron los datos vamos a escribirlos en el archivo
+    fwrite(texto, sizeof (unsigned char), cantidad_datos, texto_datos);
 
 
     fclose(texto_datos);
@@ -217,14 +215,6 @@ void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
 void insertar(char insertar, char * valores, int index) {
     int x = 0;
     char comparador = 128;
-    printf("\nValores: ");
-    while (x < 8) {
-        printf("%d ", valores[x]);
-
-        x++;
-    }
-    printf("\n");
-
 
     for (x = index; x < (index + 8); x++) {
 
@@ -246,17 +236,7 @@ void insertar(char insertar, char * valores, int index) {
 char extractor(char * valores, int index) {
     char resultado = 0;
 
-
     int x = index;
-    printf("\n++++++Valores: ");
-    while (x < 8) {
-        printf("%d ", valores[x]);
-
-        x++;
-    }
-    printf("\n");
-
-
     char extractor = 1;
 
     for (x = index; x < (index + 8); x++) {
@@ -285,28 +265,30 @@ void mostrar_valores(char * valores, int index) {
     printf("\n");
 }
 
-void leer_archivo_texto(FILE * texto) {
+//esto retorna 1 en caso de exito 
+//y 0 en caso de falla
+
+int insertar_datos_img(unsigned char * dataimg,InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
+    printf("\nIngreso a insertar_datos_img");
+    //variables para el uso:
+    char * datos_texto;
+    FILE * texto;
     char ruta[30];
     printf("\nIngresa la ruta del texto: ");
     scanf("%s", ruta);
     texto = fopen(ruta, "rb");
-
-
-}
-//esto retorna 1 en caso de exito 
-//y 0 en caso de falla
-
-int insertar_datos_img(unsigned char * dataimg, FILE * texto, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
-
-    //variables para el uso:
-    char * datos_texto;
     //primero se valida que el texto quepa dentro de la imagen
+    printf("\nLeyo el archivo y ahora leera el tamaño\n");
     int size_img = infoCabeceraBmp->imgsize;
+    printf("\nSi pudo leer el tamaño\n");
     int size_texto = 0;
+    printf("\nLinea 1");
     fseek(texto, 0L, SEEK_END);
+    printf("\nLinea 2");
     size_texto = ftell(texto);
+    printf("\nLinea 3");
     rewind(texto);
-
+    printf("size_texto: %d x8: %d imagen: %d", size_texto,(size_texto*8),size_img);
     if ((size_texto * 8) > size_img) {
         //        printf("\nEl tamaño del texto es muy grande para la imagen\n");
         perror("\nEl tamaño del texto es muy grande para la imagen\n");
@@ -332,10 +314,8 @@ int insertar_datos_img(unsigned char * dataimg, FILE * texto, InfoCabeceraBMP * 
 int main(int argc, char** argv) {
     int opcion;
 
-    FILE * imagen;
-    FILE * texto;
-    InfoCabeceraBMP info;
-    CabeceraBMP cabecera;
+    InfoCabeceraBMP * info;
+    CabeceraBMP * cabecera;
     unsigned char * dataimg;
     char ruta[30];
     do {
@@ -344,18 +324,17 @@ int main(int argc, char** argv) {
         switch (opcion) {
             case 1:
                 //ocultar informacion en la imagen
-                leer_datos_img(dataimg);
-                leer_archivo_texto(texto);
-
-                if (insertar_datos_img(dataimg, texto)) {
+                leer_datos_img(&dataimg,&info,&cabecera);
+                
+                if (insertar_datos_img(&dataimg, &info, &cabecera)) {
                     crear_imagen(dataimg, &info, &cabecera);
                 }
 
                 break;
             case 2:
                 //sacar la informacion de la imagen
-                leer_datos_img(dataimg);
-                crear_archivo();
+                leer_datos_img(dataimg,&info,&cabecera);
+                crear_archivo(dataimg, &cabecera);
 
 
                 break;
@@ -363,11 +342,10 @@ int main(int argc, char** argv) {
         }
         printf("\n");
         while (getchar() != '\n');
-        printf("\nSe salto el primer pause");
         while (getchar() != '\n');
 
     } while (opcion != 3);
-
+    free(dataimg);
     while (getchar() != '\n');
     return (EXIT_SUCCESS);
 }
