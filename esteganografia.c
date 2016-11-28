@@ -55,21 +55,7 @@ void mostrarInfoCabeceraBMO(InfoCabeceraBMP * datos) {
     printf("\nColores: %u", datos->colors);
     printf("\nColores importantes: %u", datos->imxtcolors);
 
-
-
-
 }
-
-void cifrar(int leido, char * bytes, char * texto, char * oculto) {
-    int index = 0;
-    while (index < leido) {
-        //proceso de sacar los binarios de los bytes para pasarlo en los 
-        //bits menos significativos 
-        printf("%d ", (int) bytes[index]);
-        index++;
-    }
-}
-
 
 
 unsigned char extractor();
@@ -160,30 +146,30 @@ void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, Ca
     printf("\nAcabo de terminar de escribir la imagen\n");
 }
 
-void leer_datos_img(unsigned char * dataimg, InfoCabeceraBMP * info, CabeceraBMP * cabecera) {
-    char ruta[30];
-    FILE * imagen;
-    //leer los datos
-    printf("\ningresa la ruta de la imagen: ");
-    scanf("%s", ruta);
-    imagen = fopen(ruta, "rb");
-    int size_imagen = 0;
-    int size_texto = 0;
-
-    fseek(imagen, 0L, SEEK_END);
-    size_imagen = ftell(imagen);
-    rewind(imagen);
-    fclose(imagen);
-
-    //metodo para leer la cabecera
-    dataimg = leer_imagen(ruta, info, cabecera);
-    if (dataimg == NULL) {
-        printf("\nERROR EN EL FORMATO DE IMAGEN\n");
-    } else {
-        printf("\nFORMATO SI ES VALIDO---------\n");
-
-    }
-}
+//void leer_datos_img(unsigned char * dataimg, InfoCabeceraBMP * info, CabeceraBMP * cabecera) {
+//    char ruta[30];
+//    FILE * imagen;
+//    //leer los datos
+//    printf("\ningresa la ruta de la imagen: ");
+//    scanf("%s", ruta);
+//    imagen = fopen(ruta, "rb");
+//    int size_imagen = 0;
+//    int size_texto = 0;
+//
+//    fseek(imagen, 0L, SEEK_END);
+//    size_imagen = ftell(imagen);
+//    rewind(imagen);
+//    fclose(imagen);
+//
+//    //metodo para leer la cabecera
+//    dataimg = leer_imagen(ruta, info, cabecera);
+//    if (dataimg == NULL) {
+//        printf("\nERROR EN EL FORMATO DE IMAGEN\n");
+//    } else {
+//        printf("\nFORMATO SI ES VALIDO---------\n");
+//
+//    }
+//}
 
 void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
     FILE * texto_datos;
@@ -256,60 +242,60 @@ unsigned char extractor(char * valores, int index) {
 
 }
 
-void mostrar_valores(char * valores, int index) {
-    printf("\nvalores: ");
-    int x;
-    for (x = index; x < (index + 8); x++) {
-        printf("%d ", valores[x]);
-    }
-    printf("\n");
-}
+//void mostrar_valores(char * valores, int index) {
+//    printf("\nvalores: ");
+//    int x;
+//    for (x = index; x < (index + 8); x++) {
+//        printf("%d ", valores[x]);
+//    }
+//    printf("\n");
+//}
 
 //esto retorna 1 en caso de exito 
 //y 0 en caso de falla
 
-int insertar_datos_img(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
-    printf("\nIngreso a insertar_datos_img");
-    //variables para el uso:
-    char * datos_texto;
-    FILE * texto;
-    char ruta[30];
-    printf("\nIngresa la ruta del texto: ");
-    scanf("%s", ruta);
-    texto = fopen(ruta, "rb");
-    //primero se valida que el texto quepa dentro de la imagen
-    printf("\nLeyo el archivo y ahora leera el tamaño\n");
-    int size_img = infoCabeceraBmp->imgsize;
-    printf("\nSi pudo leer el tamaño\n");
-    int size_texto = 0;
-    printf("\nLinea 1");
-    fseek(texto, 0L, SEEK_END);
-    printf("\nLinea 2");
-    size_texto = ftell(texto);
-    printf("\nLinea 3");
-    rewind(texto);
-    printf("size_texto: %d x8: %d imagen: %d", size_texto, (size_texto * 8), size_img);
-    if ((size_texto * 8) > size_img) {
-        //        printf("\nEl tamaño del texto es muy grande para la imagen\n");
-        perror("\nEl tamaño del texto es muy grande para la imagen\n");
-        return 0;
-    }
-
-    //aqui se almacena el tamaño del texto que va a insertar 
-    cabecera->resv1 = size_texto;
-
-    //se leen los datos del archivo de texto para ser insertados en la imagen
-    fread(datos_texto, sizeof (char), size_texto, texto);
-    int x = 0;
-    int index = 0;
-    for (x = 0; x < size_texto; x++) {
-        insertar(datos_texto[x], dataimg, index);
-        index += 8;
-    }
-
-    //aqui termina de insertar los datos dentro de la imagen
-    return 1; //salio con exito
-}
+//int insertar_datos_img(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
+//    printf("\nIngreso a insertar_datos_img");
+//    //variables para el uso:
+//    char * datos_texto;
+//    FILE * texto;
+//    char ruta[30];
+//    printf("\nIngresa la ruta del texto: ");
+//    scanf("%s", ruta);
+//    texto = fopen(ruta, "rb");
+//    //primero se valida que el texto quepa dentro de la imagen
+//    printf("\nLeyo el archivo y ahora leera el tamaño\n");
+//    int size_img = infoCabeceraBmp->imgsize;
+//    printf("\nSi pudo leer el tamaño\n");
+//    int size_texto = 0;
+//    printf("\nLinea 1");
+//    fseek(texto, 0L, SEEK_END);
+//    printf("\nLinea 2");
+//    size_texto = ftell(texto);
+//    printf("\nLinea 3");
+//    rewind(texto);
+//    printf("size_texto: %d x8: %d imagen: %d", size_texto, (size_texto * 8), size_img);
+//    if ((size_texto * 8) > size_img) {
+//        //        printf("\nEl tamaño del texto es muy grande para la imagen\n");
+//        perror("\nEl tamaño del texto es muy grande para la imagen\n");
+//        return 0;
+//    }
+//
+//    //aqui se almacena el tamaño del texto que va a insertar 
+//    cabecera->resv1 = size_texto;
+//
+//    //se leen los datos del archivo de texto para ser insertados en la imagen
+//    fread(datos_texto, sizeof (char), size_texto, texto);
+//    int x = 0;
+//    int index = 0;
+//    for (x = 0; x < size_texto; x++) {
+//        insertar(datos_texto[x], dataimg, index);
+//        index += 8;
+//    }
+//
+//    //aqui termina de insertar los datos dentro de la imagen
+//    return 1; //salio con exito
+//}
 
 int main(int argc, char** argv) {
     int opcion;
@@ -324,8 +310,6 @@ int main(int argc, char** argv) {
         switch (opcion) {
             case 1:
                 //ocultar informacion en la imagen
-                //                leer_datos_img(dataimg,&info,&cabecera);
-
 
                 //leer los datos
                 printf("\ningresa la ruta de la imagen: ");
@@ -387,12 +371,6 @@ int main(int argc, char** argv) {
 
 
                     }
-                    //********************************************
-                    //********************************************
-
-                    //                    if (insertar_datos_img(dataimg, &info, &cabecera)) {
-
-                    //                    }
 
                 }
 
@@ -400,12 +378,7 @@ int main(int argc, char** argv) {
                 while (getchar() != '\n');
                 break;
             case 2:
-                //sacar la informacion de la imagen
-//                leer_datos_img(dataimg, &info, &cabecera);
-                //**************************************
-                //**************************************
-//                FILE * imagen;
-                //leer los datos
+
                 printf("\ningresa la ruta de la imagen: ");
                 scanf("%s", ruta);
                 imagen = fopen(ruta, "rb");
@@ -444,72 +417,3 @@ int main(int argc, char** argv) {
     while (getchar() != '\n');
     return (EXIT_SUCCESS);
 }
-
-int ocultar_datos() {
-    FILE * imagen;
-    FILE * texto;
-    FILE * imagen_cifrada;
-    char ruta[30];
-    char ruta_texto[30];
-    int tama = 8;
-    int leido = 0;
-    int index = 0;
-    char bytes[tama];
-    char bytes_texto[(tama / 8)];
-
-    int formato_valido = 0;
-    while (formato_valido) {
-        printf("Ingresa la ruta de la imagen: ");
-        scanf("%s", ruta);
-        //        formato_valido = validar_formato(ruta, sizeof (ruta));
-        formato_valido = 0;
-    }
-
-    printf("\nIngresa el archivo a ocultar: ");
-    scanf("%s", ruta_texto);
-
-    imagen = fopen(ruta, "rb");
-    texto = fopen(ruta_texto, "rb");
-    //primero se debe de preguntar el tamaño para saber si el texto 
-    //cabe en la imagen
-    int size_imagen = 0;
-    int size_texto = 0;
-
-    fseek(imagen, 0L, SEEK_END);
-    size_imagen = ftell(imagen);
-    rewind(imagen);
-
-    fseek(texto, 0L, SEEK_END);
-    size_texto = ftell(texto);
-    rewind(texto);
-
-    //ahora aqui va la pregunta para saber el tamaño
-    if ((size_texto * 8) > size_imagen) {
-        printf("\nEl tamaño de la imagen es muy pequeño para ocultar la info\n");
-        return -1; // para terminar el proceso de cifrado
-    }
-
-
-
-
-
-    while (!feof(imagen)) {
-        //aqui vamos a leer los bytes del archivo
-
-        leido = fread(bytes, sizeof (char), tama, imagen);
-        fread(bytes_texto, sizeof (char), (tama / 8), texto);
-        char oculto[leido];
-        if (!feof(texto)) {
-            cifrar(leido, bytes, bytes_texto, oculto);
-            fwrite(oculto, sizeof (char), leido, imagen_cifrada);
-        } else {
-            //aqui para cuando ya termino de escribir los bytes del archivo de texto
-            fwrite(bytes, sizeof (char), leido, imagen_cifrada);
-        }
-
-    }
-    return 0;
-
-
-}
-
