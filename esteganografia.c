@@ -192,9 +192,9 @@ void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
     int cantidad_datos = cabecera->resv1; //valor de datos a leer
     unsigned char texto[cantidad_datos];
     int x = 0;
-//    for (x = 0; x < cantidad_datos; x++) {
-//        texto[x] = imgdata[x];
-//    }
+    //    for (x = 0; x < cantidad_datos; x++) {
+    //        texto[x] = imgdata[x];
+    //    }
     //proceso de obtencion del ultimo bit para construir los datos
     //***********************************************************
     int index = 0;
@@ -349,7 +349,7 @@ int main(int argc, char** argv) {
                     char ruta_texto[30];
                     printf("\nIngresa la ruta del texto: ");
                     scanf("%s", ruta_texto);
-                    texto = fopen(ruta_texto, "r");
+                    texto = fopen(ruta_texto, "rb");
                     //primero se valida que el texto quepa dentro de la imagen
                     printf("\nLeyo el archivo y ahora leera el tamaño\n");
                     int size_img = info.imgsize;
@@ -401,7 +401,32 @@ int main(int argc, char** argv) {
                 break;
             case 2:
                 //sacar la informacion de la imagen
-                leer_datos_img(dataimg, &info, &cabecera);
+//                leer_datos_img(dataimg, &info, &cabecera);
+                //**************************************
+                //**************************************
+//                FILE * imagen;
+                //leer los datos
+                printf("\ningresa la ruta de la imagen: ");
+                scanf("%s", ruta);
+                imagen = fopen(ruta, "rb");
+                int size_imagen = 0;
+                int size_texto = 0;
+
+                fseek(imagen, 0L, SEEK_END);
+                size_imagen = ftell(imagen);
+                rewind(imagen);
+                fclose(imagen);
+
+                //metodo para leer la cabecera
+                dataimg = leer_imagen(ruta, &info,&cabecera);
+                if (dataimg == NULL) {
+                    printf("\nERROR EN EL FORMATO DE IMAGEN\n");
+                } else {
+                    printf("\nFORMATO SI ES VALIDO---------\n");
+
+                }
+                //**************************************
+                //**************************************
                 mostrarDatosCabeceraBMP(&cabecera);
                 printf("\n");
                 crear_archivo(dataimg, &cabecera);
@@ -411,7 +436,7 @@ int main(int argc, char** argv) {
 
         }
         printf("\n");
-        
+
         while (getchar() != '\n');
 
     } while (opcion != 3);
