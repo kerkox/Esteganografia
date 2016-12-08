@@ -1,18 +1,18 @@
-/* 
+/*
  * File:   esteganografia.c
- * Author: paulker
+ * Author: Paul y Cindy
  *
  * Created on November 8, 2016, 3:45 AM
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
+#include <stdio.h> //Libreria para el manejo de archivos
+#include <stdlib.h> //Libreria estandar
+#include <stdint.h> //Libreria para el manejo de tipos de datos con valores de bits definidos
 
 /*
- * 
+ *
  */
+
 typedef struct CabeceraBMP {
     /* 2 bytes de identificación */
     uint32_t size; /* Tamaño del archivo */
@@ -56,15 +56,14 @@ void mostrarInfoCabeceraBMO(InfoCabeceraBMP * datos) {
     printf("\nColores importantes: %u", datos->imxtcolors);
 
 }
-
-
+//se declara en este punto el metodo porque se usa antes de definirce el metodo
 unsigned char extractor();
 
 unsigned char * leer_imagen(char * ruta_imagen, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
-    printf("\nEntro a leer laimagen para devolver los datos");
+    printf("\nEntro a leer la imagen para devolver los datos");
     FILE * imagen;
 
-    unsigned char *imgdata; //datos de imagen 
+    unsigned char *imgdata; //datos de imagen
     uint16_t type; // 2 bytes indentificativos del formato
 
 
@@ -75,22 +74,22 @@ unsigned char * leer_imagen(char * ruta_imagen, InfoCabeceraBMP * infoCabeceraBm
     fread(&type, sizeof (uint16_t), 1, imagen);
 
     if (type != 0x4D42) {
+        //Hexadecimal:  0x4D42  = caracteres: BM
         //aqui se comprueba el formato sino no es BMP retorna NULL
         fclose(imagen);
         return NULL;
     }
     //ahora se procede a leer la cabecera del archivo completa
-    //    fread(&cabecera, sizeof (CabeceraBMP), 1, imagen);
+
     fread(cabecera, sizeof (CabeceraBMP), 1, imagen);
-    //    printf("\nData cabecera: \n");
-    //    mostrarDatosCabeceraBMP(&cabecera);
-    //        mostrarDatosCabeceraBMP(cabecera);
+//        printf("\nData cabecera: \n");
+//        mostrarDatosCabeceraBMP(cabecera);
 
     //ahora se lee la info de la cabecera de informacion completa
     fread(infoCabeceraBmp, sizeof (InfoCabeceraBMP), 1, imagen);
     //    printf("\ninfo cabecera: \n");
     //        mostrarInfoCabeceraBMO(infoCabeceraBmp);
-    //ahora se reserva la memoria para la imagen 
+    //ahora se reserva la memoria para la imagen
     imgdata = (unsigned char*) malloc(infoCabeceraBmp->imgsize);
 
     /* se pone el cursor de lectura del archivo donde empiezan
@@ -98,19 +97,20 @@ unsigned char * leer_imagen(char * ruta_imagen, InfoCabeceraBMP * infoCabeceraBm
      * */
     fseek(imagen, cabecera->offset, SEEK_SET);
 
-    //ahora se lle los datos de la imagen tantos bytes como imgsize
+    //ahora se le los datos de la imagen tantos bytes como imgsize
     fread(imgdata, infoCabeceraBmp->imgsize, 1, imagen);
 
     //se cierra el archivo de la imagen
     fclose(imagen);
 
-    //se retorna la imagen
+    //se retorna los datos de colores de la imagen
     return imgdata;
 
 }
 
 int menu() {
-    system("clear");
+    system("clear"); // para linux
+//    system("cls"); // para windows
     printf("Esteganografia con imagenes\n\n");
     printf("1. Ocultar Informacion en Imagen\n");
     printf("2. Obtener Informacion de Imagen\n");
@@ -126,10 +126,16 @@ int menu() {
 
 void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
     FILE * imgSalida;
-    imgSalida = fopen("Salida.bmp", "w+");
+    //aqui se abre el archivo con tipo de apertura W para sobre escribirse si existe
+    imgSalida = fopen("Salida.bmp", "w");
+    //luego se cierra
+    fclose(imgSalida);
+    //se abre nuevamente para asegurar la escritura de forma binaria
+    imgSalida = fopen("Salida.bmp", "rb+");
     printf("\nentro a crear la imagen\n");
-    uint16_t type;
-    type = 0x4D42;
+//    uint16_t type;
+//    type = 0x4D42;
+    //Formato de la cabecera de BMP en caracteres
     char formato[2] = {'B', 'M'};
     //se escribe que tipo de archivo es:
     fwrite(formato, sizeof (char), 2, imgSalida);
@@ -140,50 +146,40 @@ void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, Ca
     fwrite(infoCabeceraBmp, sizeof (InfoCabeceraBMP), 1, imgSalida);
     printf("\nEscribio la info de la cabecera\n");
     //luego se escriben los datos
-    fwrite(dataimg, sizeof (unsigned char*), infoCabeceraBmp->imgsize, imgSalida);
+    int x=0;
+    /* se recorre el puntero de dataimg para ir escribiendo caracter por caracter
+     * e insertar estos valores en la imagen
+     */
+    for(x=0;x<infoCabeceraBmp->imgsize;x++){
+     fputc(dataimg[x],imgSalida);
+    }
+
+//    fwrite(dataimg, sizeof (unsigned char*), infoCabeceraBmp->imgsize, imgSalida);
+
     printf("\nEscribio los datos de la imagen\n");
+    //aqui se cierra el archivo de la imagen
     fclose(imgSalida);
     printf("\nAcabo de terminar de escribir la imagen\n");
 }
 
-//void leer_datos_img(unsigned char * dataimg, InfoCabeceraBMP * info, CabeceraBMP * cabecera) {
-//    char ruta[30];
-//    FILE * imagen;
-//    //leer los datos
-//    printf("\ningresa la ruta de la imagen: ");
-//    scanf("%s", ruta);
-//    imagen = fopen(ruta, "rb");
-//    int size_imagen = 0;
-//    int size_texto = 0;
-//
-//    fseek(imagen, 0L, SEEK_END);
-//    size_imagen = ftell(imagen);
-//    rewind(imagen);
-//    fclose(imagen);
-//
-//    //metodo para leer la cabecera
-//    dataimg = leer_imagen(ruta, info, cabecera);
-//    if (dataimg == NULL) {
-//        printf("\nERROR EN EL FORMATO DE IMAGEN\n");
-//    } else {
-//        printf("\nFORMATO SI ES VALIDO---------\n");
-//
-//    }
-//}
-
 void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
     FILE * texto_datos;
+    //se abre para asegurar la sobreescritura si existe
     texto_datos = fopen("texto.txt", "w");
+    //se cierra el archivo con ese formato de apertura
+    fclose(texto_datos);
+    //se abre nuevamente para asegurar escritura de forma binaria
+
+    texto_datos = fopen("texto.txt", "rb+");
     //de la cabecera saco el valor de datos a leer
-    int cantidad_datos = cabecera->resv1; //valor de datos a leer
+    int cantidad_datos = cabecera->resv1; //valor de bytes a leer
+    //se crea un arreglo con el tamaño de los bytes a leer
     unsigned char texto[cantidad_datos];
     int x = 0;
-    //    for (x = 0; x < cantidad_datos; x++) {
-    //        texto[x] = imgdata[x];
-    //    }
-    //proceso de obtencion del ultimo bit para construir los datos
-    //***********************************************************
     int index = 0;
+    //obtencion de datos con el metodo extractor el cual lee los bytes
+    //de la imagen y usa el bit menos significativo para contruir el byte
+    // del archivo a extraer
     for (x = 0; x < cantidad_datos; x++) {
         texto[x] = extractor(imgdata, index);
         index += 8;
@@ -191,15 +187,20 @@ void crear_archivo(unsigned char * imgdata, CabeceraBMP * cabecera) {
 
     //ahora que se leyeron los datos vamos a escribirlos en el archivo
     fwrite(texto, sizeof (unsigned char), cantidad_datos, texto_datos);
-
-
+    //se cierra el archivo de salida
     fclose(texto_datos);
     //este metodo debe de recibir los datos de la imagen y poder obtener la info
 
 }
 
-void insertar(unsigned char insertar, char * valores, int index) {
+void insertar(unsigned char insertar,unsigned char * valores, int index) {
+    //este metodo recibe un caracter a insertar, un arreglo de caracteres
+    //los cuales se van a alterar y un indice por donde se debe recorrer
+    //el arreglo de valores
     int x = 0;
+    //este comparador se usar para hacer un (Y) logico
+    //el valor de este comparador es:
+    //1000 0000 un byte que equuivale a -128 o 128 sin signo
     char comparador = 128;
 
     for (x = index; x < (index + 8); x++) {
@@ -242,61 +243,6 @@ unsigned char extractor(char * valores, int index) {
 
 }
 
-//void mostrar_valores(char * valores, int index) {
-//    printf("\nvalores: ");
-//    int x;
-//    for (x = index; x < (index + 8); x++) {
-//        printf("%d ", valores[x]);
-//    }
-//    printf("\n");
-//}
-
-//esto retorna 1 en caso de exito 
-//y 0 en caso de falla
-
-//int insertar_datos_img(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
-//    printf("\nIngreso a insertar_datos_img");
-//    //variables para el uso:
-//    char * datos_texto;
-//    FILE * texto;
-//    char ruta[30];
-//    printf("\nIngresa la ruta del texto: ");
-//    scanf("%s", ruta);
-//    texto = fopen(ruta, "rb");
-//    //primero se valida que el texto quepa dentro de la imagen
-//    printf("\nLeyo el archivo y ahora leera el tamaño\n");
-//    int size_img = infoCabeceraBmp->imgsize;
-//    printf("\nSi pudo leer el tamaño\n");
-//    int size_texto = 0;
-//    printf("\nLinea 1");
-//    fseek(texto, 0L, SEEK_END);
-//    printf("\nLinea 2");
-//    size_texto = ftell(texto);
-//    printf("\nLinea 3");
-//    rewind(texto);
-//    printf("size_texto: %d x8: %d imagen: %d", size_texto, (size_texto * 8), size_img);
-//    if ((size_texto * 8) > size_img) {
-//        //        printf("\nEl tamaño del texto es muy grande para la imagen\n");
-//        perror("\nEl tamaño del texto es muy grande para la imagen\n");
-//        return 0;
-//    }
-//
-//    //aqui se almacena el tamaño del texto que va a insertar 
-//    cabecera->resv1 = size_texto;
-//
-//    //se leen los datos del archivo de texto para ser insertados en la imagen
-//    fread(datos_texto, sizeof (char), size_texto, texto);
-//    int x = 0;
-//    int index = 0;
-//    for (x = 0; x < size_texto; x++) {
-//        insertar(datos_texto[x], dataimg, index);
-//        index += 8;
-//    }
-//
-//    //aqui termina de insertar los datos dentro de la imagen
-//    return 1; //salio con exito
-//}
-
 int main(int argc, char** argv) {
     int opcion;
     FILE * imagen;
@@ -337,16 +283,12 @@ int main(int argc, char** argv) {
                     //primero se valida que el texto quepa dentro de la imagen
                     printf("\nLeyo el archivo y ahora leera el tamaño\n");
                     int size_img = info.imgsize;
-                    printf("\nSi pudo leer el tamaño\n");
                     int size_texto = 0;
-                    printf("\nLinea 1");
                     fseek(texto, 0L, SEEK_END);
-                    printf("\nLinea 2");
                     size_texto = ftell(texto);
-                    printf("\nLinea 3");
                     rewind(texto);
                     unsigned char datos_texto[size_texto];
-                    printf("size_texto: %d x8: %d imagen: %d", size_texto, (size_texto * 8), size_img);
+                    printf("\nsize_texto: %d x8: %d imagen: %d", size_texto, (size_texto * 8), size_img);
                     if ((size_texto * 8) > size_img) {
                         //        printf("\nEl tamaño del texto es muy grande para la imagen\n");
                         perror("\nEl tamaño del texto es muy grande para la imagen\n");
@@ -354,7 +296,7 @@ int main(int argc, char** argv) {
                     }
 
                     if (error == 1) {
-                        //aqui se almacena el tamaño del texto que va a insertar 
+                        //aqui se almacena el tamaño del texto que va a insertar
                         cabecera.resv1 = size_texto;
 
                         //se leen los datos del archivo de texto para ser insertados en la imagen
