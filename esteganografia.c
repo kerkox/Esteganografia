@@ -124,6 +124,27 @@ int menu() {
     return opcion;
 }
 
+char * path_imagen(char * ruta, int size, char * path){
+    int x = 0;
+    int index = 0;
+    while(x<size){
+        if(ruta[x]=='\\'){
+            index = x;
+        }
+        if(ruta[x]=='p'&&ruta[x-1]=='m'&&ruta[x-2]=='b'&&ruta[x-3]=='.'){
+            break;
+        }
+        x++;
+    }
+
+    for(x=0;x<=index;x++){
+        path[x] = ruta[x];
+    }
+    path[index+1]='\0';
+
+
+}
+
 void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
     FILE * imgSalida;
     //aqui se abre el archivo con tipo de apertura W para sobre escribirse si existe
@@ -245,21 +266,28 @@ unsigned char extractor(char * valores, int index) {
 
 int main(int argc, char** argv) {
     int opcion;
+    int error = 0;
     FILE * imagen;
     InfoCabeceraBMP info;
     CabeceraBMP cabecera;
     unsigned char * dataimg;
-    char ruta[30];
+    char ruta[100];
+    char path[100];
     do {
 
         opcion = menu();
         switch (opcion) {
             case 1:
+                //para obligar a colocar la variable en su valor original
+                error =0;
                 //ocultar informacion en la imagen
 
                 //leer los datos
                 printf("\ningresa la ruta de la imagen: ");
                 scanf("%s", ruta);
+                printf("\nEl path de la imagen es: \n");
+                path_imagen(ruta,100, path);
+                printf("%s\n",path);
                 imagen = fopen(ruta, "rb");
 
 
@@ -273,13 +301,22 @@ int main(int argc, char** argv) {
 
                     //********************************************
                     //********************************************
-                    int error = 1;
 
                     FILE * texto;
                     char ruta_texto[30];
-                    printf("\nIngresa la ruta del texto: ");
-                    scanf("%s", ruta_texto);
-                    texto = fopen(ruta_texto, "rb");
+                    while(error==0){
+                        printf("\nIngresa la ruta del texto: ");
+                        scanf("%s", ruta_texto);
+                        texto = fopen(ruta_texto, "rb");
+                        if(texto==NULL){
+                            printf("\nError archivo no encontrado o archivo no valido");
+                            //para liberar el buffer del teclado
+                            fflush(stdin);
+                        }else{
+                            error = 1;
+                        }
+                    }
+
                     //primero se valida que el texto quepa dentro de la imagen
                     printf("\nLeyo el archivo y ahora leera el tamaño\n");
                     int size_img = info.imgsize;
@@ -320,10 +357,20 @@ int main(int argc, char** argv) {
                 while (getchar() != '\n');
                 break;
             case 2:
+                //para ayudar a colocar la variable en su valor original
+                error = 0;
+                while(error == 0){
+                    printf("\ningresa la ruta de la imagen: ");
+                    scanf("%s", ruta);
+                    imagen = fopen(ruta, "rb");
 
-                printf("\ningresa la ruta de la imagen: ");
-                scanf("%s", ruta);
-                imagen = fopen(ruta, "rb");
+                    if(imagen == NULL){
+                        printf("\nError imagen no valida o archivo no encontrado");
+                        fflush(stdin);
+                    }else{
+                        error = 1;
+                    }
+                }
                 int size_imagen = 0;
                 int size_texto = 0;
 
@@ -336,16 +383,19 @@ int main(int argc, char** argv) {
                 dataimg = leer_imagen(ruta, &info,&cabecera);
                 if (dataimg == NULL) {
                     printf("\nERROR EN EL FORMATO DE IMAGEN\n");
+
                 } else {
                     printf("\nFORMATO SI ES VALIDO---------\n");
-
+                    error = 2;
                 }
                 //**************************************
                 //**************************************
-                mostrarDatosCabeceraBMP(&cabecera);
-                printf("\n");
-                crear_archivo(dataimg, &cabecera);
-                printf("\nTermino de  leer el archivo y sacarlo");
+                if(error==2){
+                    mostrarDatosCabeceraBMP(&cabecera);
+                    printf("\n");
+                    crear_archivo(dataimg, &cabecera);
+                    printf("\nTermino de  leer el archivo y sacarlo");
+                }
                 while (getchar() != '\n');
                 break;
 
