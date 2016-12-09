@@ -2,7 +2,6 @@
  * File:   esteganografia.c
  * Author: Paul y Cindy
  *
- * Created on November 8, 2016, 3:45 AM
  */
 
 #include <stdio.h> //Libreria para el manejo de archivos
