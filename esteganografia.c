@@ -124,26 +124,6 @@ int menu() {
     return opcion;
 }
 
-char * path_imagen(char * ruta, int size, char * path){
-    int x = 0;
-    int index = 0;
-    while(x<size){
-        if(ruta[x]=='\\'){
-            index = x;
-        }
-        if(ruta[x]=='p'&&ruta[x-1]=='m'&&ruta[x-2]=='b'&&ruta[x-3]=='.'){
-            break;
-        }
-        x++;
-    }
-
-    for(x=0;x<=index;x++){
-        path[x] = ruta[x];
-    }
-    path[index+1]='\0';
-
-
-}
 
 void crear_imagen(unsigned char * dataimg, InfoCabeceraBMP * infoCabeceraBmp, CabeceraBMP * cabecera) {
     FILE * imgSalida;
@@ -267,7 +247,6 @@ unsigned char extractor(char * valores, int index) {
 int main(int argc, char** argv) {
     int opcion;
     int error = 0;
-    FILE * imagen;
     InfoCabeceraBMP info;
     CabeceraBMP cabecera;
     unsigned char * dataimg;
@@ -285,12 +264,6 @@ int main(int argc, char** argv) {
                 //leer los datos
                 printf("\ningresa la ruta de la imagen: ");
                 scanf("%s", ruta);
-                printf("\nEl path de la imagen es: \n");
-                path_imagen(ruta,100, path);
-                printf("%s\n",path);
-                imagen = fopen(ruta, "rb");
-
-
                 //metodo para leer la cabecera
                 dataimg = leer_imagen(ruta, &info, &cabecera);
                 if (dataimg == NULL) {
