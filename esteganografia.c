@@ -248,6 +248,7 @@ int main(int argc, char** argv) {
     int error = 0;
     InfoCabeceraBMP info;
     CabeceraBMP cabecera;
+    FILE * imagen;
     unsigned char * dataimg;
     char ruta[100];
     char path[100];
